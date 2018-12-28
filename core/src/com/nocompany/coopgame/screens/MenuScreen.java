@@ -1,5 +1,6 @@
 package com.nocompany.coopgame.screens;
 
+import java.io.IOException;
 import java.net.InetAddress;
 
 import com.badlogic.gdx.Gdx;
@@ -54,14 +55,20 @@ public class MenuScreen implements Screen {
 		
 		stage.addActor(makeServerBtn);
 		
-		TextButton makeClientBtn = new TextButton("stop server", skin);
+		TextButton makeClientBtn = new TextButton("connect client", skin);
 		makeClientBtn.setPosition(30, 30);
 		makeClientBtn.addListener(new ClickListener() {
 			
 			@Override
 	        public void clicked(InputEvent event, float x, float y) {
-				System.out.println("client");
-				Network.getInstance().DestroyServer();
+				try {
+					Network.getInstance().connectClient();
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				myGdxGame.setScreen(myGdxGame.gameScreen);
+				
 			}
 			
 		});
@@ -79,28 +86,22 @@ public class MenuScreen implements Screen {
 				ipList = new Group();
 				ipList.setPosition(300, 300);
 	
-				Gdx.app.postRunnable(new Runnable() {
-					
-					@Override
-					public void run() {
-						// TODO Auto-generated method stub
-						java.util.List<InetAddress> adrList = Network.getInstance().GetAdrList();
-						
-						for (InetAddress ia: adrList) {
-							String ipString = ia.getHostName();
-							System.out.println(ipString);
-							Label label = new Label(ipString, skin);
-							
-							scrollTable.add(label);
-						    scrollTable.row();
-						}
-					}
-				});
+				System.out.println("ok");
+
+				InetAddress adrList = Network.getInstance().GetAdr();
 				
+				System.out.println(adrList.getHostAddress());
+
 				
-				
-				
-				//stage.addActor(ipList);
+//				java.util.List<InetAddress> adrList = Network.getInstance().GetAdrList();
+//				System.out.println("ok");
+//
+//				for (InetAddress ia: adrList) {
+//					String ipString = ia.getHostName();
+//					System.out.println(ipString);
+//					
+//				}
+
 			}
 			
 		});
@@ -145,7 +146,9 @@ public class MenuScreen implements Screen {
 	@Override
 	public void hide() {
 		// TODO Auto-generated method stub
-		
+		Gdx.input.setInputProcessor(null);
+		System.out.println("ok");
+
 	}
 
 	@Override

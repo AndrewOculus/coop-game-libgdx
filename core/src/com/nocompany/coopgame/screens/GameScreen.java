@@ -10,6 +10,8 @@ import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.physics.box2d.BodyDef.BodyType;
 import com.nocompany.coopgame.MyGdxGame;
 import com.nocompany.coopgame.controller.UIGamepad;
+import com.nocompany.coopgame.network.Network;
+import com.nocompany.coopgame.network.protocol.SomeRequest;
 import com.nocompany.coopgame.physics.Action;
 import com.nocompany.coopgame.physics.GameObject;
 import com.nocompany.coopgame.physics.Physics;
@@ -22,8 +24,12 @@ public class GameScreen implements Screen, InputProcessor {
 	private Physics physics;
 	private GameObject.Builder builder;
 	private OrthographicCamera camera;
+	private final Network network = Network.getInstance();
 	
 	public GameScreen(MyGdxGame mgg) {
+		
+		Gdx.input.setInputProcessor(this);
+		
 		this.myGdxGame = mgg;
 		this.uiGamepad = new UIGamepad();
 		this.physics = new Physics(new Vector2());
@@ -40,15 +46,35 @@ public class GameScreen implements Screen, InputProcessor {
 			
 			float velocity = 1000;
 			Vector3 pos = new Vector3();
+			SomeRequest someRequest = new SomeRequest();
 			
 			@Override
 			public void act(float dt, GameObject self) {
 				self.body.setLinearVelocity(uiGamepad.getDx()*dt*velocity, uiGamepad.getDy()*dt*velocity);
 				pos.set(self.body.getPosition(), 0);
 				camera.position.lerp(pos, 0.2f);
+				someRequest.position = self.body.getPosition();
+				network.sendData(someRequest);
+				
 			}
 		})
 		.build();
+		
+		builder = new GameObject.Builder(physics);
+		builder.setPos(new Vector2(10, 10))
+		.setShape(ShapeType.box)
+		.setType(BodyType.DynamicBody)
+		.setSize(new Vector2(1,1))
+		.setAction(new Action() {
+						
+			@Override
+			public void act(float dt, GameObject self) {
+				if(network.getRequest()!=null)
+					self.body.setTransform(network.getRequest().position, 0);
+			}
+		})
+		.build();
+		
 		
 		// TODO Auto-generated constructor stub
 	}
