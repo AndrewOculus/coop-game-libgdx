@@ -11,13 +11,14 @@ import com.badlogic.gdx.physics.box2d.BodyDef.BodyType;
 import com.nocompany.coopgame.MyGdxGame;
 import com.nocompany.coopgame.controller.UIGamepad;
 import com.nocompany.coopgame.network.Network;
-import com.nocompany.coopgame.network.protocol.SomeRequest;
+import com.nocompany.coopgame.network.protocol.InstantiateRequest;
+import com.nocompany.coopgame.network.protocol.UpdatePackage;
 import com.nocompany.coopgame.physics.Action;
 import com.nocompany.coopgame.physics.GameObject;
 import com.nocompany.coopgame.physics.Physics;
 import com.nocompany.coopgame.physics.ShapeType;
 
-public class GameScreen implements Screen, InputProcessor {
+public class GameScreen implements Screen, InputProcessor, UIGamepad.Archer {
 
 	private MyGdxGame myGdxGame;
 	private UIGamepad uiGamepad;
@@ -41,12 +42,13 @@ public class GameScreen implements Screen, InputProcessor {
 		builder.setPos(new Vector2(0, 0))
 		.setShape(ShapeType.box)
 		.setType(BodyType.DynamicBody)
+		.setUserInfo("hero")
 		.setSize(new Vector2(1,1))
 		.setAction(new Action() {
 			
 			float velocity = 1000;
 			Vector3 pos = new Vector3();
-			SomeRequest someRequest = new SomeRequest();
+			UpdatePackage someRequest = new UpdatePackage();
 			
 			@Override
 			public void act(float dt, GameObject self) {
@@ -54,28 +56,11 @@ public class GameScreen implements Screen, InputProcessor {
 				pos.set(self.body.getPosition(), 0);
 				camera.position.lerp(pos, 0.2f);
 				someRequest.position = self.body.getPosition();
-				network.sendData(someRequest);
-				
+				network.updateHero(someRequest);
+					
 			}
 		})
 		.build();
-		
-		builder = new GameObject.Builder(physics);
-		builder.setPos(new Vector2(10, 10))
-		.setShape(ShapeType.box)
-		.setType(BodyType.DynamicBody)
-		.setSize(new Vector2(1,1))
-		.setAction(new Action() {
-						
-			@Override
-			public void act(float dt, GameObject self) {
-				if(network.getRequest()!=null)
-					self.body.setTransform(network.getRequest().position, 0);
-			}
-		})
-		.build();
-		
-		
 		// TODO Auto-generated constructor stub
 	}
 	
@@ -143,8 +128,34 @@ public class GameScreen implements Screen, InputProcessor {
 		uiGamepad.render(dt);
 		
 		camera.update();
+		
+		instanceHeroIfNeed();
+		
 	}
 
+	public void instanceHeroIfNeed() {
+		InstantiateRequest instantiateRequest = network.getInstantiateRequest();
+		if(instantiateRequest!=null) {
+			
+			builder = new GameObject.Builder(physics);
+			builder.setPos(new Vector2(10, 10))
+			.setShape(ShapeType.box)
+			.setType(BodyType.DynamicBody)
+			.setUserInfo(instantiateRequest.name)
+			.setSize(new Vector2(1,1))
+			.setAction(new Action() {
+							
+				@Override
+				public void act(float dt, GameObject self) {
+					if(network.getRequest()!=null)
+						self.body.setTransform(network.getRequest().position, 0);
+				}
+			})
+			.build();
+			
+		}
+	}
+	
 	@Override
 	public void resize(int width, int height) {
 		// TODO Auto-generated method stub
@@ -173,6 +184,12 @@ public class GameScreen implements Screen, InputProcessor {
 	public void dispose() {
 		// TODO Auto-generated method stub
 		
+	}
+
+	@Override
+	public void shoot() {
+		// TODO Auto-generated method stub
+	
 	}
 
 }

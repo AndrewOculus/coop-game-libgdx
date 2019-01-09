@@ -3,9 +3,7 @@ package com.nocompany.coopgame.physics;
 import com.badlogic.gdx.physics.box2d.*;
 import com.badlogic.gdx.graphics.*;
 import com.badlogic.gdx.math.*;
-import com.badlogic.gdx.graphics.glutils.*;
 import com.badlogic.gdx.utils.*;
-import com.badlogic.gdx.physics.box2d.joints.*;
 import java.util.*;
 
 public class Physics implements Disposable
@@ -46,24 +44,23 @@ public class Physics implements Disposable
         bodyDef.position.set(pos.x, pos.y);
 		Body body = this.world.createBody(bodyDef);
 
+		Shape shape = null;
+		
 		if(shType == ShapeType.box){
-			PolygonShape shape = new PolygonShape();
-			shape.setAsBox(size.x, size.y);
-			FixtureDef fixtureDef = new FixtureDef();
-			fixtureDef.shape = shape;
-			fixtureDef.density = 1f;
-			Fixture fixture = body.createFixture(fixtureDef);
-			shape.dispose();
+			shape = new PolygonShape();
+			((PolygonShape) shape).setAsBox(size.x, size.y);
 		}
-       	else{
-			CircleShape shape = new CircleShape();
+		else {
+			shape = new CircleShape();
 			shape.setRadius(size.x);
-			FixtureDef fixtureDef = new FixtureDef();
-			fixtureDef.shape = shape;
-			fixtureDef.density = 1f;
-			Fixture fixture = body.createFixture(fixtureDef);
-			shape.dispose();
 		}
+				
+		FixtureDef fixtureDef = new FixtureDef();
+		fixtureDef.shape = shape;
+		fixtureDef.density = 1f;
+		Fixture fixture = body.createFixture(fixtureDef);
+		shape.dispose();
+
 		return body;
 	}
 

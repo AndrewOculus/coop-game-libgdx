@@ -7,6 +7,12 @@ import com.badlogic.gdx.graphics.*;
 
 public class UIGamepad implements Disposable
 {
+	public interface Archer {
+
+		void shoot();
+
+	}
+
 	private ShapeRenderer shapeRenderer;
 	private final float propX = 0.5f;
 	private final float propY = 0.3f;
@@ -20,11 +26,16 @@ public class UIGamepad implements Disposable
 	private float w;
 	private int touchNum = -1;
 	private boolean isTouched;
+	private Archer archer;
 	
 	public  UIGamepad()	{
 		shapeRenderer = new ShapeRenderer();
 		h = Gdx.graphics.getHeight();
 		w = Gdx.graphics.getWidth();
+	}
+	
+	public void setArcher(Archer archer) {
+		this.archer = archer;
 	}
 	
 	public void render(float dt){
@@ -43,6 +54,8 @@ public class UIGamepad implements Disposable
 				bx = tx;
 				by = ty;
 				break;
+			}else {
+				archer.shoot();
 			}
 		
 		}
@@ -87,4 +100,8 @@ public class UIGamepad implements Disposable
 		shapeRenderer.dispose();
 	}
 	
+}
+
+interface Archer {
+	public void shoot();
 }

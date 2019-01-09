@@ -62,6 +62,7 @@ public static class Builder{
 	private BodyDef.BodyType type = BodyDef.BodyType.DynamicBody;
 	private ShapeType shapeType = ShapeType.box;
 	private List<Action> actions = new ArrayList<Action>();
+	private Object userInfo = "";
 
 	public Builder(Physics pw){
 		this.physicsWorld = pw;
@@ -91,12 +92,19 @@ public static class Builder{
 		this.actions.add(act);
 		return this;
 	}
+	
+	public Builder setUserInfo(String name) {
+		this.userInfo = name;
+		return this;
+	}
 
 	public GameObject build(){
 		gameObject = new GameObject();
 		gameObject.setWorld(physicsWorld.getWorld());
 		gameObject.body = physicsWorld.istantiate(position,size,type,shapeType);
+		gameObject.body.setUserData(userInfo);
 		gameObject.actions = actions;
+		
 		physicsWorld.addGameObject(gameObject);
 		return gameObject;
 	}
